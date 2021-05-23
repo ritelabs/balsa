@@ -12,16 +12,11 @@ description = "Protocol definitions for the rust language implementation of the 
 categories = ["algorithms", "database-implementations"]
 build = "build.rs"
 
-[features]
-default = ["prost-codec"]
-protobuf-codec = ["protobuf-build/protobuf-codec"]
-prost-codec = ["protobuf-build/prost-codec", "prost", "lazy_static"]
-
 [build-dependencies]
-protobuf-build = { version = "0.12", default-features = false }
+protobuf-build = { version = "0.12", default-features = false , features = ["prost-codec"] }
 
 [dependencies]
-lazy_static = { version = "1", optional = true }
-prost = { version = "0.7", optional = true }
+lazy_static = "1.4"
+prost = "0.7"
 protobuf = "2"
 
