@@ -1,9 +1,8 @@
-# Raft
+# Balsa - Another Raft, The Same Consensus
 
-[![Build Status](https://travis-ci.org/tikv/raft-rs.svg?branch=master)](https://travis-ci.org/tikv/raft-rs)
-[![Documentation](https://docs.rs/raft/badge.svg)](https://docs.rs/raft/)
-[![Crates.io](https://img.shields.io/crates/v/raft.svg)](https://crates.io/crates/raft)
-[![dependency status](https://deps.rs/repo/github/tikv/raft-rs/status.svg)](https://deps.rs/repo/github/tikv/raft-rs)
+[![Documentation](https://docs.rs/balsa/badge.svg)](https://docs.rs/balsa/)
+[![Crates.io](https://img.shields.io/crates/v/raft.svg)](https://crates.io/crates/balsa)
+[![dependency status](https://deps.rs/repo/github//balsa/status.svg)](https://deps.rs/repo/github/ritelabs/balsa)
 
 ## Problem and Importance
 
@@ -31,13 +30,17 @@ A complete Raft model contains 4 essential parts:
 
 > Note: This Raft implementation in Rust includes the core Consensus Module only, not the other parts. The core Consensus Module in the Raft crate is customizable, flexible, and resilient. You can directly use the Raft crate, but you will need to build your own Log, State Machine and Transport components.
 
-## Using the raft crate
+## Usage
 
-You can use raft with either [rust-protobuf](https://github.com/pingcap/rust-protobuf) or [Prost](https://github.com/danburkert/prost) to encode/decode gRPC messages. We use rust-protobuf by default. To use Prost, build (or depend on) Raft using the `prost-codec` feature and without default features.
+`Balsa` use [Prost](https://github.com/danburkert/prost) to encode/decode gRPC messages. Just add it to `Cargo.toml`.
 
-## Developing the Raft crate
+``` toml
+balsa = "**"
+```
 
-`Raft` is built using the latest version of `stable` Rust, using [the 2018 edition](https://doc.rust-lang.org/edition-guide/rust-2018/).
+## Development
+
+`Balsa` is built using the latest version of `stable` Rust, using [the 2018 edition](https://doc.rust-lang.org/edition-guide/rust-2018/).
 Minimum supported version is `1.44.0`.
 
 Using `rustup` you can get started this way:
@@ -67,9 +70,9 @@ See [instructions](proto/README.md) in the proto subdirectory.
 
 ### Benchmarks
 
-We use [Criterion](https://github.com/japaric/criterion.rs) for benchmarking.
+We use [Criterion](https://github.com/bheisler/criterion.rs) for benchmarking.
 
-> It's currently an ongoing effort to build an appropriate benchmarking suite. If you'd like to help out please let us know! [Interested?](https://github.com/tikv/raft-rs/issues/109)
+> It's currently an ongoing effort to build an appropriate benchmarking suite. If you'd like to help out please let us know!
 
 You can run the benchmarks by installing `gnuplot` then running:
 
@@ -92,11 +95,8 @@ This will report relative increases or decreased for each benchmark.
 
 ## Acknowledgments
 
-Thanks [etcd](https://github.com/coreos/etcd) for providing the amazing Go implementation!
-
-## Projects using the Raft crate
-
-- [TiKV](https://github.com/tikv/tikv), a distributed transactional key value database powered by Rust and Raft.
+- Thanks [etcd](https://github.com/coreos/etcd) for providing the amazing Go implementation!
+- Thanks [raft-rs](https://github.com/tikv/raft-rs) for providing the correct Rust implementation! This is the basis of all current work.
 
 ## Links for Further Research
 
