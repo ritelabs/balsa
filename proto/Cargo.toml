@@ -1,0 +1,27 @@
+[package]
+name = "balsa-proto"
+version = "0.1.0"
+authors = ["RiteLabs"]
+edition = "2018"
+license = "Apache-2.0 OR MIT"
+keywords = ["raft", "distributed-systems", "ha"]
+repository = "https://github.com/ritelabs/balsa/proto"
+homepage = "https://github.com/ritelabs/balsa/proto"
+documentation = "https://docs.rs/balsa-proto"
+description = "Protocol definitions for the rust language implementation of the Raft algorithm."
+categories = ["algorithms", "database-implementations"]
+build = "build.rs"
+
+[features]
+default = ["prost-codec"]
+protobuf-codec = ["protobuf-build/protobuf-codec"]
+prost-codec = ["protobuf-build/prost-codec", "prost", "lazy_static"]
+
+[build-dependencies]
+protobuf-build = { version = "0.12", default-features = false }
+
+[dependencies]
+lazy_static = { version = "1", optional = true }
+prost = { version = "0.7", optional = true }
+protobuf = "2"
+
