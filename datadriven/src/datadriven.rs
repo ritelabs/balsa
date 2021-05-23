@@ -11,9 +11,9 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 
-use difference::assert_diff;
 use lazy_static::lazy_static;
-use slog::debug;
+use similar_asserts::assert_eq;
+use tracing::debug;
 
 /// The main function to run tests
 ///
@@ -69,7 +69,7 @@ use slog::debug;
 /// This is used to separate them, instead of mixing the characters altogether.
 ///
 /// ```rust
-/// use datadriven::{TestData, CmdArg};
+/// use balsa_datadriven::{TestData, CmdArg};
 ///
 /// fn func(d: &TestData) -> String {
 ///     let args : Vec<CmdArg> = d.cmd_args.clone();
@@ -88,7 +88,7 @@ use slog::debug;
 /// If there are no blank line in expected value, it will be overwritten with one separator,
 /// instead of double separator, vice versa.
 ///
-pub fn run_test<F>(path: &str, mut f: F, rewrite: bool, logger: &slog::Logger) -> Result<()>
+pub fn run_test<F>(path: &str, mut f: F, rewrite: bool) -> Result<()>
 where
     F: FnMut(&TestData) -> String,
 {
@@ -96,7 +96,7 @@ where
 
     for path in &files {
         let content = fs::read_to_string(path)?;
-        if let Some(rewrite_data) = run_test_internal(path, &content, &mut f, rewrite, logger)? {
+        if let Some(rewrite_data) = run_test_internal(path, &content, &mut f, rewrite)? {
             let mut file = OpenOptions::new().write(true).truncate(true).open(path)?;
             file.write_all(rewrite_data.as_bytes())?;
             file.sync_data()?;
@@ -113,13 +113,12 @@ fn run_test_internal<F, P>(
     content: &str,
     mut f: F,
     rewrite: bool,
-    logger: &slog::Logger,
 ) -> Result<Option<String>>
 where
     F: FnMut(&TestData) -> String,
     P: AsRef<Path>,
 {
-    let mut r = TestDataReader::new(source_name, content, rewrite, logger);
+    let mut r = TestDataReader::new(source_name, content, rewrite);
 
     while r.next()? {
         run_directive(&mut r, &mut f);
@@ -132,7 +131,7 @@ where
         }
         rb
     });
-    debug!(logger, "rewrite_buffer: {:?}", data);
+    debug!("rewrite_buffer: {:?}", data);
     Ok(data)
 }
 
@@ -150,7 +149,7 @@ where
 
     // test mode
     if r.rewrite_buffer == None {
-        assert_diff!(&actual, &r.data.expected, "\n", 0);
+        assert_eq!(&actual, &r.data.expected);
     } else {
         r.emit("----");
         if has_blank_line(&actual) {

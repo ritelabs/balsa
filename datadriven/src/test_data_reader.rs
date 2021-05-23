@@ -7,18 +7,17 @@ use crate::test_data::TestData;
 use anyhow::Result;
 
 use anyhow::bail;
-use slog::debug;
+use tracing::debug;
 
 pub struct TestDataReader<'a> {
     source_name: PathBuf,
     pub data: TestData,
     scanner: Enumerate<Lines<'a>>,
-    pub logger: slog::Logger,
     pub rewrite_buffer: Option<String>,
 }
 
 impl<'a> TestDataReader<'a> {
-    pub fn new<P>(source_name: P, content: &'a str, rewrite: bool, logger: &slog::Logger) -> Self
+    pub fn new<P>(source_name: P, content: &'a str, rewrite: bool) -> Self
     where
         P: AsRef<Path>,
     {
@@ -26,7 +25,6 @@ impl<'a> TestDataReader<'a> {
             source_name: source_name.as_ref().to_path_buf(),
             scanner: content.lines().enumerate(),
             data: TestData::default(),
-            logger: logger.clone(),
             rewrite_buffer: match rewrite {
                 true => Some(String::new()),
                 false => None,
@@ -82,7 +80,7 @@ impl<'a> TestDataReader<'a> {
                 pos += 1;
             }
 
-            debug!(self.logger, "argument_after_cleanup: {}", line);
+            debug!("argument_after_cleanup: {}", line);
 
             // Start reading argument
             // Init data
@@ -91,13 +89,13 @@ impl<'a> TestDataReader<'a> {
             // Save `line` information for error/debug message usage
             self.data.pos = format!("{} : L{}", self.source_name.as_path().display(), pos + 1);
 
-            let (cmd, cmd_args) = parse_line(&line, &self.logger)?;
+            let (cmd, cmd_args) = parse_line(&line)?;
 
             if cmd.is_empty() {
                 bail!("cmd must not be empty");
             }
 
-            debug!(self.logger, "cmd: {}, cmd_args: {:?}", cmd, cmd_args,);
+            debug!("cmd: {}, cmd_args: {:?}", cmd, cmd_args,);
 
             self.data.cmd = cmd;
             self.data.cmd_args = cmd_args;
@@ -113,7 +111,7 @@ impl<'a> TestDataReader<'a> {
 
                 let line = line.unwrap().1;
 
-                debug!(self.logger, "input line: {:?}", line);
+                debug!("input line: {:?}", line);
                 if line == "----" {
                     separator = true;
                     break;
@@ -126,7 +124,7 @@ impl<'a> TestDataReader<'a> {
 
             self.data.input = buf.trim().to_string();
 
-            debug!(self.logger, "input before separator: {:?}", self.data.input);
+            debug!("input before separator: {:?}", self.data.input);
 
             if separator {
                 self.read_expected();

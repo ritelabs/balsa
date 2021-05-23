@@ -4,7 +4,7 @@ use regex::Regex;
 
 use anyhow::{anyhow, bail};
 use lazy_static::lazy_static;
-use slog::debug;
+use tracing::debug;
 
 // Token
 // (1) argument (no value)
@@ -16,15 +16,15 @@ use slog::debug;
 //
 // parse_line parses a line of datadriven input language and returns
 // the parsed command and CmdArgs.
-pub fn parse_line(line: &str, logger: &slog::Logger) -> Result<(String, Vec<CmdArg>)> {
-    debug!(logger, "line pass to split_directives: {:?}", line);
+pub fn parse_line(line: &str) -> Result<(String, Vec<CmdArg>)> {
+    debug!("line pass to split_directives: {:?}", line);
 
     let fields = split_directives(line)?;
     if fields.is_empty() {
         return Ok((String::new(), vec![]));
     }
 
-    debug!(logger, "argument after split: {:?}", fields);
+    debug!("argument after split: {:?}", fields);
 
     let cmd = fields[0].clone();
     let mut cmd_args = vec![];
@@ -32,7 +32,7 @@ pub fn parse_line(line: &str, logger: &slog::Logger) -> Result<(String, Vec<CmdA
     for arg in &fields[1..] {
         let key_value = arg.splitn(2, '=').collect::<Vec<&str>>();
 
-        debug!(logger, "keyvalue: {:?}", key_value);
+        debug!("keyvalue: {:?}", key_value);
 
         match key_value.len() {
             1 => {
@@ -45,7 +45,7 @@ pub fn parse_line(line: &str, logger: &slog::Logger) -> Result<(String, Vec<CmdA
             2 => {
                 let (key, val) = (key_value[0].to_string(), key_value[1]);
 
-                debug!(logger, "val: {:?}", val);
+                debug!("val: {:?}", val);
 
                 if val.starts_with('(') && val.ends_with(')') {
                     // trim because white space is allow.
@@ -104,9 +104,9 @@ mod tests {
 
     #[test]
     fn test_parse_line() -> Result<()> {
-        let logger = default_logger();
+        default_logger();
         let line = "cmd a=1 b=(2,3) c= d";
-        let (cmd, cmd_args) = parse_line(line, &logger)?;
+        let (cmd, cmd_args) = parse_line(line)?;
         assert_eq!(cmd, "cmd");
         assert_eq!(format!("{:?}", cmd_args), "[a=1, b=(2,3), c=, d]");
 

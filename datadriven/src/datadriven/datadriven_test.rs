@@ -6,8 +6,8 @@ use std::cmp;
 use std::fs::{read_to_string, OpenOptions};
 use std::io::Write;
 
-use difference::assert_diff;
-use slog::debug;
+use similar_asserts::assert_eq;
+use tracing::debug;
 
 fn fibonacci(n: u32) -> u32 {
     match n {
@@ -155,10 +155,10 @@ fn fibonacci_or_factorial_or_sum(d: &TestData) -> String {
 
 #[test]
 fn test_rewrite() -> Result<()> {
+    default_logger();
+
     // set 'true' if you want to rewrite 'rewrite_test'
     let rewrite_testfiles = false;
-
-    let logger = default_logger();
 
     let path = "src/testdata/rewrite";
 
@@ -180,13 +180,13 @@ fn test_rewrite() -> Result<()> {
         }
     }
 
-    debug!(logger, "files: {:?}", files);
+    debug!("files: {:?}", files);
 
     for file in &files {
         let content = read_to_string(file.to_owned() + "-before")?;
 
         if let Some(rewrite_data) =
-            run_test_internal(path, &content, handle, /*rewrite*/ true, &logger)?
+            run_test_internal(path, &content, handle, /*rewrite*/ true)?
         {
             if rewrite_testfiles {
                 let mut after_path = OpenOptions::new()
@@ -196,7 +196,7 @@ fn test_rewrite() -> Result<()> {
                 after_path.write_all(rewrite_data.as_bytes())?;
             } else {
                 let content = read_to_string(file.to_owned() + "-after")?.replace('\r', "");
-                assert_diff!(&rewrite_data, &content, "\n", 0);
+                assert_eq!(&rewrite_data, &content);
             }
         }
     }
@@ -206,35 +206,32 @@ fn test_rewrite() -> Result<()> {
 
 #[test]
 fn test_datadriven() -> Result<()> {
-    let logger = default_logger();
+    default_logger();
     let rewrite = false;
 
     run_test(
         "src/testdata/datadriven",
         fibonacci_or_factorial_or_sum,
         rewrite,
-        &logger,
     )?;
     Ok(())
 }
 
 #[test]
 fn test_unknown_data() {
-    let logger = default_logger();
+    default_logger();
     let rewrite = false;
 
     let e = run_test(
         "src/testdata/unknown_data_1.txt",
         fibonacci_or_factorial_or_sum,
         rewrite,
-        &logger,
     );
     assert!(e.is_err());
     let e = run_test(
         "src/testdata/unknown_data_2.txt",
         fibonacci_or_factorial_or_sum,
         rewrite,
-        &logger,
     );
     assert!(e.is_err());
 }

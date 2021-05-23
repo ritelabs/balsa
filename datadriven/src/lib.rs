@@ -1,5 +1,6 @@
 /*!
 # datadriven
+
 **datadriven** is a tool for testing. Ported from [cockroachdb/datadriven](https://github.com/cockroachdb/datadriven)
 
 To execute data-driven tests, pass the path of the test file as well as a
@@ -40,7 +41,7 @@ The path tree looks like the following:
             └── data_002.txt
 ```
 
-The comparison is done by [difference](https://docs.rs/difference/2.0.0/difference/)
+The comparison is done by [similar-asserts](https://docs.rs/similar-asserts/1.1.0/similar_asserts/)
 
 The difference between [cockroachdb/datadriven](https://github.com/cockroachdb/datadriven)
 1. no rewrite
@@ -60,19 +61,27 @@ pub use self::datadriven::walk;
 pub use self::test_data::CmdArg;
 pub use self::test_data::TestData;
 use anyhow::Result;
-use slog::Drain;
 use std::fs::read_dir;
 use std::io;
 use std::path::PathBuf;
 
-use slog::o;
-
 #[allow(dead_code)]
-fn default_logger() -> slog::Logger {
-    let decorator = slog_term::TermDecorator::new().build();
-    let drain = slog_term::FullFormat::new(decorator).build().fuse();
-    let drain = slog_async::Async::new(drain).build().fuse();
-    slog::Logger::root(drain, o!())
+fn default_logger() {
+    use std::sync::Once;
+    use tracing_subscriber::prelude::*;
+    use tracing_subscriber::{fmt, EnvFilter};
+    static START: Once = Once::new();
+    START.call_once(|| {
+        let fmt_layer = fmt::layer().with_target(false);
+        let filter_layer = EnvFilter::try_from_default_env()
+            .or_else(|_| EnvFilter::try_new("debug"))
+            .unwrap();
+
+        tracing_subscriber::registry()
+            .with(fmt_layer)
+            .with(filter_layer)
+            .init();
+    });
 }
 
 fn get_dirs_or_file(path: &str) -> Result<Vec<PathBuf>> {
