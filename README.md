@@ -1,7 +1,7 @@
 # Balsa - Another Raft, The Same Consensus
 
 [![Documentation](https://docs.rs/balsa/badge.svg)](https://docs.rs/balsa/)
-[![Crates.io](https://img.shields.io/crates/v/raft.svg)](https://crates.io/crates/balsa)
+[![Crates.io](https://img.shields.io/crates/v/balsa.svg)](https://crates.io/crates/balsa)
 [![dependency status](https://deps.rs/repo/github//balsa/status.svg)](https://deps.rs/repo/github/ritelabs/balsa)
 
 ## Problem and Importance
