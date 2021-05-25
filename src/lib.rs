@@ -547,6 +547,6 @@ pub mod prelude {
     pub use crate::Progress;
 }
 
-type DefaultHashBuilder = std::hash::BuildHasherDefault<seahash::SeaHasher>;
+type DefaultHashBuilder = std::hash::BuildHasherDefault<ritehash::FxHasher>;
 type HashMap<K, V> = std::collections::HashMap<K, V, DefaultHashBuilder>;
 type HashSet<K> = std::collections::HashSet<K, DefaultHashBuilder>;
